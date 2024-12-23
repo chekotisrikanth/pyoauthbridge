@@ -74,9 +74,9 @@ if __name__ == '__main__':
   while True:
     order_update = conn.read_order_update_data()
     if(order_update):
-      # print(order_update)
-      new_order_status = 
-      print(order_update["login_id"], order_update["order_status"])
+       print(order_update)
+      #new_order_status = 
+      #print(order_update["login_id"], order_update["order_status"])
 
   # i = 0
   # while True:

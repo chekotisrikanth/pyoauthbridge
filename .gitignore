@@ -5,3 +5,4 @@ dist
 .idea
 .pyoauthbridge-library.iml
 .misc.xml
+pyoauthbridge/test_profile.py
