@@ -7,6 +7,7 @@ from wsclient import socket_connect, get_compact_marketdata, get_detailed_market
 from selenium_auth import start_selenium_thread
 import sys
 import time
+import os
 
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
@@ -31,7 +32,24 @@ class Connect:
             url = base_url.replace("http", "ws")
         self.websocket_url = url
 
-    def get_access_token(self):
+    def get_access_token(self,auto_login=True):
+        # read access token from token.json file
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            token_file_path = os.path.join(script_dir, 'token.json')
+            with open(token_file_path, 'r') as f:
+                data = json.load(f)
+                self.access_token = data['access_token']
+                date_created = data['date_created']
+                # check if access token is expired when date_created is in format 24-12-2024T12:00:00 and check for 24 hours from date_created
+                if date_created.split("T")[0] == time.strftime("%d-%m-%Y"):
+                    if int(date_created.split("T")[1].split(":")[0]) + 24 > int(time.strftime("%H")):
+                        return self.access_token
+                else:
+                    print("Access token expired")
+        except:
+            pass
+            # if access token is not present in token.json file, then get access token from server
         base_url = self.base_url
         client_id = self.client_id
         client_secret = self.client_secret
@@ -46,7 +64,8 @@ class Connect:
         server_thread.start()
         
         # Start selenium automation in a separate thread
-        selenium_thread = start_selenium_thread(self.username, self.password,self.totp_secret)
+        if auto_login:
+           selenium_thread = start_selenium_thread(self.username, self.password,self.totp_secret)
         
         # Poll for token availability
         while True:
@@ -54,6 +73,11 @@ class Connect:
                 access_token = server.fetch_access_token()
                 if access_token:
                     self.access_token = access_token
+                    #write access token to token.json file with date_created
+                    script_dir = os.path.dirname(os.path.abspath(__file__))
+                    token_file_path = os.path.join(script_dir, 'token.json')
+                    with open(token_file_path, 'w') as f:
+                        json.dump({'access_token': access_token, 'date_created': time.strftime("%d-%m-%YT%H:%M:%S")}, f)
                     return access_token
             except:
                 pass

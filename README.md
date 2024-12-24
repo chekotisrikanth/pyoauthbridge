@@ -1,78 +1,25 @@
-# pyoauthbridge
 
-pyoauthbridge is a official python library to communicate with Tradelab API.
+1. cd pyoauthbridge/pyoauthbridge
 
-### Prerequisites
 
-* Please refer the document http://primusapi.tradelab.in/webapi/
-* This API uses OAuth 2.0 protocol . You will need following to get started -(Please contact your broker team to get these details)
-```
-app_id
-app_secret
-redirect_url
-base_url
-```
+2. install dependencies by running:
+pip  install -r requirements.txt
 
-### Installation
+3. create .env file with below contents. login details are needed only if we auto_login true. in this case code uses selenium to automatically login and get the token.
+In this case token gets stored in token.json file with date time. for next run it will check if token is expired or not.
 
-pyoauthbridge requires [python](https://www.python.org/) v3+ to run.
+APP_ID=SAS-CLIENT1
+APP_SECRET=
+REDIRECT_URL=http://127.0.0.1/
+BASE_URL=https://api.stocko.in
+AUTO_LOGIN=True
+LOGIN_ID=
+LOGIN_PASSWORD=
+TOTP_SECRET=
 
-Install the package using pip.
+4. if you face any issues while using  selenium, you can use auto_login=false and once the server starts. hit url http://127.0.0.1/getcode
+5. if you want to use this token for next time. store token in token.json file and update date_created. code will automatically use this token and check if it is expired within 24 hour.
 
-```sh
-$ pip3 install pyoauthbridge
-```
 
-### How to use
 
-import package
-```sh
-from pyoauthbridge import Connect
-```
 
-Get access token
-```sh
-conn = Connect(app_id, app_secret, redirect_url, base_url)
-access_token = conn.get_access_token()
-```
-
-#### Open the link in your browser displayed in terminal. Complete your login process.
-
-If the user has access_token , it can be set without calling get_access_token()
-```sh
-conn.set_access_token(access_token)
-```
-
-implementation
-```sh
-payload = {
-    'client_id': 'JOHN'
-}
-res = conn.fetch_profile(payload)
-print(res)
-```
-
-### Websocket implementation
-
-```sh
-
-# To connect to websocket
-ws_status = conn.run_socket()
-
-# To subscribe to Detailed Market Data Message
-conn.subscribe_detailed_marketdata({'exchangeCode': 4, 'instrumentToken': 226027})
-
-# To subscribe to Compact Market Data 
-conn.subscribe_compact_marketdata({'exchangeCode': 4, 'instrumentToken': 226027})
-
-# To subscribe to Snapquote Data 
-conn.subscribe_snapquote_data({'exchangeCode': 4, 'instrumentToken': 226027})
-
-# To read/listen to Detailed Market Data
-detailed_market_data = conn.read_detailed_marketdata()
-
-# To read/listen to Compact Market Data
-compact_market_data = conn.read_compact_marketdata()
-
-# To read/listen to Snapquote Data
-snapquote_data = conn.read_snapquote_data()
