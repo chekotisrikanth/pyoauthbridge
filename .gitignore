@@ -6,3 +6,4 @@ dist
 .pyoauthbridge-library.iml
 .misc.xml
 pyoauthbridge/test_profile.py
+.env

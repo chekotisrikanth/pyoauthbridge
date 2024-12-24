@@ -4,13 +4,14 @@ from server import Server
 from threading import Thread
 from flask import request
 from wsclient import socket_connect, get_compact_marketdata, get_detailed_marketdata, get_snapquotedata, send_message, get_ws_connection_status, unsubscribe_update, get_order_update, get_multiple_detailed_marketdata, get_multiple_compact_marketdata, get_multiple_snapquotedata
+from selenium_auth import start_selenium_thread
 import sys
 import time
 
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
 class Connect:
-    def __init__(self, client_id, client_secret, redirect_url, base_url):
+    def __init__(self, client_id, client_secret, redirect_url, base_url, username, password,totp_secret):
         self.headers = {'Content-type': 'application/json'}
         self.access_token = ""
         self.login_id = ""
@@ -18,6 +19,9 @@ class Connect:
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_url = redirect_url
+        self.username = username
+        self.password = password
+        self.totp_secret = totp_secret
         redirect_url_split = redirect_url.split(":")
         self.port = 80
         url = ""
@@ -40,6 +44,9 @@ class Connect:
         server_thread = Thread(target=lambda: app.run(host='127.0.0.1', debug=False, port=self.port))
         server_thread.daemon = True  # Thread will be terminated when main thread exits
         server_thread.start()
+        
+        # Start selenium automation in a separate thread
+        selenium_thread = start_selenium_thread(self.username, self.password,self.totp_secret)
         
         # Poll for token availability
         while True:
